@@ -14,14 +14,6 @@ const config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
-      colors: {
-        classSky: "#C3EBFA",
-        classSkyLight: "#EDF9FD",
-        classPurple: "blue-500",
-        classPurpleLight: "#F1F0FF",
-        classYellow: "#FAE27C",
-        classYellowLight: "#FEFCE8",
-      },
     },
   },
   plugins: [
