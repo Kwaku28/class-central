@@ -10,11 +10,16 @@ import {
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Dispatch, JSX, SetStateAction, useEffect, useState } from "react";
-import { useFormState } from "react-dom";
+import {
+  Dispatch,
+  JSX,
+  SetStateAction,
+  useActionState,
+  useEffect,
+  useState,
+} from "react";
 import { FormContainerProps } from "./FormContainer";
 import { toast } from "react-toastify";
-
 
 const deleteActionMap = {
   subject: deleteSubject,
@@ -115,7 +120,7 @@ const FormModal = ({
   const [open, setOpen] = useState(false);
 
   const Form = () => {
-    const [state, formAction] = useFormState(deleteActionMap[table], {
+    const [state, formAction] = useActionState(deleteActionMap[table], {
       success: false,
       error: false,
     });
@@ -141,7 +146,11 @@ const FormModal = ({
         </button>
       </form>
     ) : type === "create" || type === "update" ? (
-      forms[table](setOpen, type, data, relatedData)
+      forms[table] ? (
+        forms[table](setOpen, type, data, relatedData)
+      ) : (
+        "Form not found!"
+      )
     ) : (
       "Form not found!"
     );
@@ -150,7 +159,7 @@ const FormModal = ({
   return (
     <>
       <button
-        className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
+        className={`${size} flex items-center justify-center rounded-full cursor-pointer ${bgColor}`}
         onClick={() => setOpen(true)}
       >
         <Image src={`/icons/${type}.png`} alt="" width={16} height={16} />
