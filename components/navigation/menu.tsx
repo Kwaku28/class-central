@@ -121,26 +121,33 @@ const Menu = async () => {
   const user = await currentUser();
   const role = user?.publicMetadata.role as string;
   return (
-    <div className="mt-4 text-sm">
+    <div className="mt-4 text-sm remove-scrollbar overflow-y-scroll h-[calc(100vh-4rem)]">
       {menuItems.map((i) => (
         <div className="flex flex-col gap-2" key={i.title}>
-          <span className="hidden lg:block text-gray-400 font-light my-4">
+          <span className="hidden lg:block text-gray-400 font-light my-3">
             {i.title}
           </span>
-          {i.items.map((item) => {
-            if (item.visible.includes(role)) {
-              return (
-                <Link
-                  href={item.href}
-                  key={item.label}
-                  className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-classSkyLight"
-                >
-                  <Image src={item.icon} alt="menu icon" width={20} height={20} />
-                  <span className="hidden lg:block">{item.label}</span>
-                </Link>
-              );
-            }
-          })}
+          <div>
+            {i.items.map((item) => {
+              if (item.visible.includes(role)) {
+                return (
+                  <Link
+                    href={item.href}
+                    key={item.label}
+                    className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-classSkyLight"
+                  >
+                    <Image
+                      src={item.icon}
+                      alt="menu icon"
+                      width={20}
+                      height={20}
+                    />
+                    <span className="hidden lg:block">{item.label}</span>
+                  </Link>
+                );
+              }
+            })}
+          </div>
         </div>
       ))}
     </div>
