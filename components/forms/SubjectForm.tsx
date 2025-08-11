@@ -1,13 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import InputField from "./InputField";
 import { subjectSchema, SubjectSchema } from "@/lib/formValidationSchemas";
 import { createSubject, updateSubject } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+
+import Select from 'react-select';
+import makeAnimated from 'react-select/animated';
+
+const animatedComponents = makeAnimated();
 
 const SubjectForm = ({
   type,
@@ -24,6 +29,8 @@ const SubjectForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    control,
+    setValue,
   } = useForm<SubjectSchema>({
     resolver: zodResolver(subjectSchema),
   });
@@ -59,7 +66,7 @@ const SubjectForm = ({
         {type === "create" ? "Create a new subject" : "Update the subject"}
       </h1>
 
-      <div className="flex justify-between flex-wrap gap-4">
+      <div className="flex justify-between flex-wrap gap-1">
         <InputField
           label="Subject name"
           name="name"
@@ -77,22 +84,26 @@ const SubjectForm = ({
             hidden
           />
         )}
-        <div className="flex flex-col gap-2 w-full md:w-1/4">
+        <div className="flex flex-col gap-2 w-full">
           <label className="text-xs text-gray-500">Teachers</label>
-          <select
-            multiple
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("teachers")}
-            defaultValue={data?.teachers}
-          >
-            {teachers.map(
-              (teacher: { id: string; name: string; surname: string }) => (
-                <option value={teacher.id} key={teacher.id}>
-                  {teacher.name + " " + teacher.surname}
-                </option>
-              )
+          <Controller
+            name="teachers"
+            control={control}
+            defaultValue={data?.teachers || []}
+            render={({ field }) => (
+              <Select
+                isMulti
+                components={animatedComponents}
+                options={teachers.map((teacher: { id: string; name: string; surname: string }) => ({
+                  value: teacher.id,
+                  label: `${teacher.name} ${teacher.surname}`,
+                }))}
+                value={field.value}
+                onChange={field.onChange}
+                menuPlacement="auto"
+              />
             )}
-          </select>
+          />
           {errors.teachers?.message && (
             <p className="text-xs text-red-400">
               {errors.teachers.message.toString()}
@@ -103,7 +114,7 @@ const SubjectForm = ({
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>
       )}
-      <button className="bg-blue-400 text-white p-2 rounded-md">
+      <button className="bg-blue-400 text-white p-2 rounded-md cursor-pointer">
         {type === "create" ? "Create" : "Update"}
       </button>
     </form>
