@@ -1,13 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import InputField from "./InputField";
 import { classSchema, ClassSchema } from "@/lib/formValidationSchemas";
 import { createClass, updateClass } from "@/lib/actions";
 import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
+
+const animatedComponents = makeAnimated();
 
 const ClassForm = ({
   type,
@@ -24,6 +28,7 @@ const ClassForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    control,
   } = useForm<ClassSchema>({
     resolver: zodResolver(classSchema),
   });
@@ -86,23 +91,46 @@ const ClassForm = ({
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Supervisor</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("supervisorId")}
-            defaultValue={data?.teachers}
-          >
-            {teachers.map(
-              (teacher: { id: string; name: string; surname: string }) => (
-                <option
-                  value={teacher.id}
-                  key={teacher.id}
-                  selected={data && teacher.id === data.supervisorId}
-                >
-                  {teacher.name + " " + teacher.surname}
-                </option>
-              )
+          <Controller
+            name="supervisorId"
+            control={control}
+            defaultValue={data?.teachers || ""}
+            render={({ field }) => (
+              <Select
+                components={animatedComponents}
+                options={teachers.map(
+                  (teacher: { id: string; name: string; surname: string }) => ({
+                    value: teacher.id,
+                    label: `${teacher.name} ${teacher.surname}`,
+                  })
+                )}
+                value={
+                  field.value
+                    ? {
+                        value: field.value,
+                        label: teachers.find(
+                          (t: { id: string; name: string; surname: string }) =>
+                            t.id === field.value
+                        )?.name +
+                          " " +
+                          teachers.find(
+                            (t: { id: string; name: string; surname: string }) =>
+                              t.id === field.value
+                          )?.surname,
+                      }
+                    : null
+                }
+                onChange={(option) => {
+                  if (option && !Array.isArray(option) && "value" in option) {
+                    field.onChange(option.value);
+                  } else {
+                    field.onChange("");
+                  }
+                }}
+                menuPlacement="auto"
+              />
             )}
-          </select>
+          />
           {errors.supervisorId?.message && (
             <p className="text-xs text-red-400">
               {errors.supervisorId.message.toString()}
@@ -111,21 +139,30 @@ const ClassForm = ({
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Grade</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("gradeId")}
-            defaultValue={data?.gradeId}
-          >
-            {grades.map((grade: { id: number; level: number }) => (
-              <option
-                value={grade.id}
-                key={grade.id}
-                selected={data && grade.id === data.gradeId}
-              >
-                {grade.level}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="gradeId"
+            control={control}
+            defaultValue={data?.gradeId || ""}
+            render={({ field }) => (
+              <Select
+                options={grades.map((grade: { id: number; level: number }) => ({
+                  value: grade.id,
+                  label: grade.level.toString(),
+                }))}
+                value={
+                  field.value
+                    ? {
+                        value: field.value,
+                        label: grades.find((g: { id: number; level: number }) => g.id === field.value)?.level
+                          .toString(),
+                      }
+                    : null
+                }
+                onChange={(option) => field.onChange(option?.value)}
+                menuPlacement="auto"
+              />
+            )}
+          />
           {errors.gradeId?.message && (
             <p className="text-xs text-red-400">
               {errors.gradeId.message.toString()}
