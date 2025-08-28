@@ -1,13 +1,23 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import InputField from "./InputField";
 import { examSchema, ExamSchema } from "@/lib/formValidationSchemas";
 import { createExam, updateExam } from "@/lib/actions";
-import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  startTransition,
+  useActionState,
+  useEffect,
+} from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
+
+const animatedComponents = makeAnimated();
 
 const ExamForm = ({
   type,
@@ -24,6 +34,7 @@ const ExamForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    control,
   } = useForm<ExamSchema>({
     resolver: zodResolver(examSchema),
   });
@@ -37,8 +48,9 @@ const ExamForm = ({
   );
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
-    formAction(data);
+    startTransition(() => {
+      formAction(data);
+    });
   });
 
   const router = useRouter();
@@ -95,17 +107,34 @@ const ExamForm = ({
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Lesson</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("lessonId")}
-            defaultValue={data?.teachers}
-          >
-            {lessons.map((lesson: { id: number; name: string }) => (
-              <option value={lesson.id} key={lesson.id}>
-                {lesson.name}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="lessonId"
+            control={control}
+            defaultValue={data?.lessonId || ""}
+            render={({ field }) => (
+              <Select
+                options={lessons.map(
+                  (lesson: { id: number; name: string }) => ({
+                    value: lesson.id,
+                    label: lesson.name,
+                  })
+                )}
+                value={
+                  field.value
+                    ? {
+                        value: field.value,
+                        label: lessons.find(
+                          (l: { id: number; name: string }) =>
+                            l.id === field.value
+                        )?.name,
+                      }
+                    : null
+                }
+                onChange={(option) => field.onChange(option?.value)}
+                menuPlacement="auto"
+              />
+            )}
+          />
           {errors.lessonId?.message && (
             <p className="text-xs text-red-400">
               {errors.lessonId.message.toString()}
@@ -116,7 +145,10 @@ const ExamForm = ({
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>
       )}
-      <button className="bg-blue-400 text-white p-2 rounded-md">
+      <button
+        type="submit"
+        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
+      >
         {type === "create" ? "Create" : "Update"}
       </button>
     </form>
