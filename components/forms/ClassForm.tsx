@@ -5,7 +5,13 @@ import { Controller, useForm } from "react-hook-form";
 import InputField from "./InputField";
 import { classSchema, ClassSchema } from "@/lib/formValidationSchemas";
 import { createClass, updateClass } from "@/lib/actions";
-import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  startTransition,
+  useActionState,
+  useEffect,
+} from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
@@ -42,8 +48,9 @@ const ClassForm = ({
   );
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
-    formAction(data);
+    startTransition(() => {
+      formAction(data);
+    });
   });
 
   const router = useRouter();
@@ -108,14 +115,21 @@ const ClassForm = ({
                   field.value
                     ? {
                         value: field.value,
-                        label: teachers.find(
-                          (t: { id: string; name: string; surname: string }) =>
-                            t.id === field.value
-                        )?.name +
+                        label:
+                          teachers.find(
+                            (t: {
+                              id: string;
+                              name: string;
+                              surname: string;
+                            }) => t.id === field.value
+                          )?.name +
                           " " +
                           teachers.find(
-                            (t: { id: string; name: string; surname: string }) =>
-                              t.id === field.value
+                            (t: {
+                              id: string;
+                              name: string;
+                              surname: string;
+                            }) => t.id === field.value
                           )?.surname,
                       }
                     : null
@@ -153,8 +167,12 @@ const ClassForm = ({
                   field.value
                     ? {
                         value: field.value,
-                        label: grades.find((g: { id: number; level: number }) => g.id === field.value)?.level
-                          .toString(),
+                        label: grades
+                          .find(
+                            (g: { id: number; level: number }) =>
+                              g.id === field.value
+                          )
+                          ?.level.toString(),
                       }
                     : null
                 }
@@ -173,7 +191,10 @@ const ClassForm = ({
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>
       )}
-      <button className="bg-blue-400 text-white p-2 rounded-md">
+      <button
+        type="submit"
+        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
+      >
         {type === "create" ? "Create" : "Update"}
       </button>
     </form>
