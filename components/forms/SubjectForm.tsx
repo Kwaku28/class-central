@@ -9,8 +9,8 @@ import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
-import Select from 'react-select';
-import makeAnimated from 'react-select/animated';
+import Select from "react-select";
+import makeAnimated from "react-select/animated";
 
 const animatedComponents = makeAnimated();
 
@@ -44,7 +44,6 @@ const SubjectForm = ({
   );
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
     formAction(data);
   });
 
@@ -94,10 +93,12 @@ const SubjectForm = ({
               <Select
                 isMulti
                 components={animatedComponents}
-                options={teachers.map((teacher: { id: string; name: string; surname: string }) => ({
-                  value: teacher.id,
-                  label: `${teacher.name} ${teacher.surname}`,
-                }))}
+                options={teachers.map(
+                  (teacher: { id: string; name: string; surname: string }) => ({
+                    value: teacher.id,
+                    label: `${teacher.name} ${teacher.surname}`,
+                  })
+                )}
                 value={field.value}
                 onChange={field.onChange}
                 menuPlacement="auto"
@@ -114,7 +115,10 @@ const SubjectForm = ({
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>
       )}
-      <button className="bg-blue-400 text-white p-2 rounded-md cursor-pointer">
+      <button
+        type="submit"
+        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
+      >
         {type === "create" ? "Create" : "Update"}
       </button>
     </form>
