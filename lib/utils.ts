@@ -47,3 +47,28 @@ export const adjustScheduleToCurrentWeek = (
   });
 };
 
+export const AcademicYear = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const academicYear = `${year}/${(year + 1).toString().slice(-2)}`;
+  return academicYear;
+};
+
+export const formatDate = (date: Date): string => {
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
+export const formatTime = (date: Date): string => {
+  return date.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+export const formatDateTime = (date: Date): string => {
+  return `${formatDate(date)} ${formatTime(date)}`;
+};
