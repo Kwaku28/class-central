@@ -4,7 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import InputField from "./InputField";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useActionState, useEffect, useState } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  startTransition,
+  useActionState,
+  useEffect,
+  useState,
+} from "react";
 import { teacherSchema, TeacherSchema } from "@/lib/formValidationSchemas";
 import { createTeacher, updateTeacher } from "@/lib/actions";
 import { useRouter } from "next/navigation";
@@ -42,12 +49,22 @@ const TeacherForm = ({
     {
       success: false,
       error: false,
+      message: "",
     }
   );
 
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
-    formAction({ ...data, img: img?.secure_url });
+    startTransition(() => {
+      formAction({
+        ...data,
+        img: img?.secure_url,
+        subjects: Array.isArray(data.subjects)
+          ? data.subjects.map((s: any) =>
+              typeof s === "object" ? String(s.value) : String(s)
+            )
+          : [],
+      });
+    });
   });
 
   const router = useRouter();
@@ -65,7 +82,7 @@ const TeacherForm = ({
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
-        {type === "create" ? "Create a new teacher" : "Update the teacher"}
+        {type === "create" ? "Create new Teacher" : "Update Teacher"}
       </h1>
       <span className="text-xs text-gray-400 font-medium">
         Authentication Information
@@ -97,6 +114,42 @@ const TeacherForm = ({
       <span className="text-xs text-gray-400 font-medium">
         Personal Information
       </span>
+      <CldUploadWidget
+        uploadPreset="teacher"
+        onSuccess={(result, { widget }) => {
+          setImg(result.info);
+          widget.close();
+        }}
+      >
+        {({ open }) => {
+          return (
+            <div
+              className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden text-xs text-gray-500 gap-2 cursor-pointer"
+              onClick={() => open()}
+            >
+              {img?.secure_url ? (
+                <Image
+                  src={img.secure_url}
+                  alt="Student"
+                  width={128}
+                  height={128}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <>
+                  <Image
+                    src="/icons/upload.png"
+                    alt=""
+                    width={28}
+                    height={28}
+                  />
+                  <span>Upload a photo</span>
+                </>
+              )}
+            </div>
+          );
+        }}
+      </CldUploadWidget>
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
           label="First Name"
@@ -153,14 +206,29 @@ const TeacherForm = ({
         )}
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Sex</label>
-          <select
-            className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-            {...register("sex")}
-            defaultValue={data?.sex}
-          >
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
-          </select>
+          <Controller
+            name="sex"
+            control={control}
+            defaultValue={data?.sex || ""}
+            render={({ field }) => (
+              <Select
+                options={[
+                  { value: "MALE", label: "Male" },
+                  { value: "FEMALE", label: "Female" },
+                ]}
+                value={
+                  field.value
+                    ? {
+                        value: field.value,
+                        label: field.value === "MALE" ? "Male" : "Female",
+                      }
+                    : null
+                }
+                onChange={(option) => field.onChange(option?.value)}
+                menuPlacement="auto"
+              />
+            )}
+          />
           {errors.sex?.message && (
             <p className="text-xs text-red-400">
               {errors.sex.message.toString()}
@@ -172,17 +240,37 @@ const TeacherForm = ({
           <Controller
             name="subjects"
             control={control}
-            defaultValue={data?.subjects || []}
+            defaultValue={
+              data?.subjects?.map((subject: { id: number; name: string }) => ({
+                value: String(subject.id),
+                label: subject.name,
+              })) || []
+            }
             render={({ field }) => (
               <Select
                 isMulti
                 components={animatedComponents}
-                options={subjects.map((subject: { id: number; name: string }) => ({
-                  value: subject.id,
-                  label: subject.name,
-                }))}
-                value={field.value}
-                onChange={field.onChange}
+                options={subjects.map(
+                  (subject: { id: number; name: string }) => ({
+                    value: String(subject.id),
+                    label: subject.name,
+                  })
+                )}
+                value={(field.value ?? []).map((val: any) =>
+                  typeof val === "object"
+                    ? val
+                    : subjects
+                        .filter((s: { id: number }) => String(s.id) === String(val))
+                        .map((s: { id: number; name: string }) => ({
+                          value: String(s.id),
+                          label: s.name,
+                        }))[0]
+                )}
+                onChange={(selected) =>
+                  field.onChange(
+                    selected ? selected.map((opt: any) => String(opt.value)) : []
+                  )
+                }
                 menuPlacement="auto"
               />
             )}
@@ -193,31 +281,17 @@ const TeacherForm = ({
             </p>
           )}
         </div>
-        <CldUploadWidget
-          uploadPreset="school"
-          onSuccess={(result, { widget }) => {
-            setImg(result.info);
-            widget.close();
-          }}
-        >
-          {({ open }) => {
-            return (
-              <div
-                className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
-                onClick={() => open()}
-              >
-                <Image src="/icons/upload.png" alt="" width={28} height={28} />
-                <span>Upload a photo</span>
-              </div>
-            );
-          }}
-        </CldUploadWidget>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">
+    {state.message || "Something went wrong!"}
+  </span>
       )}
-      <button className="bg-blue-400 text-white p-2 rounded-md cursor-pointer">
-        {type === "create" ? "Create" : "Update"}
+      <button
+        type="submit"
+        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
+      >
+        {type === "create" ? "Create Teacher" : "Update Teacher"}
       </button>
     </form>
   );
