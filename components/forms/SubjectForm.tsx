@@ -5,7 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import InputField from "./InputField";
 import { subjectSchema, SubjectSchema } from "@/lib/formValidationSchemas";
 import { createSubject, updateSubject } from "@/lib/actions";
-import { Dispatch, SetStateAction, useActionState, useEffect } from "react";
+import { Dispatch, SetStateAction, startTransition, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 
@@ -44,7 +44,9 @@ const SubjectForm = ({
   );
 
   const onSubmit = handleSubmit((data) => {
-    formAction(data);
+    startTransition(() => {
+      formAction(data);
+    });
   });
 
   const router = useRouter();
@@ -88,7 +90,12 @@ const SubjectForm = ({
           <Controller
             name="teachers"
             control={control}
-            defaultValue={data?.teachers || []}
+            defaultValue={
+              data?.teachers?.map((teacher: { id: string; name: string }) => ({
+                value: teacher.id,
+                label: teacher.name,
+              })) || []
+            }
             render={({ field }) => (
               <Select
                 isMulti
@@ -99,8 +106,23 @@ const SubjectForm = ({
                     label: `${teacher.name} ${teacher.surname}`,
                   })
                 )}
-                value={field.value}
-                onChange={field.onChange}
+                value={(field.value ?? [])
+                  .map((id: string | { value: string; label: string }) => {
+                    if (typeof id === "object" && id.value && id.label)
+                      return id;
+                    const t = teachers.find(
+                      (teacher: any) => teacher.id === id
+                    );
+                    return t
+                      ? { value: t.id, label: `${t.name} ${t.surname}` }
+                      : null;
+                  })
+                  .filter(Boolean)}
+                onChange={(selected) =>
+                  field.onChange(
+                    selected ? selected.map((opt: any) => opt.value) : []
+                  )
+                }
                 menuPlacement="auto"
               />
             )}
