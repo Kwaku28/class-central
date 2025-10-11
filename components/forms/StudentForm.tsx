@@ -7,6 +7,7 @@ import Image from "next/image";
 import {
   Dispatch,
   SetStateAction,
+  startTransition,
   useActionState,
   useEffect,
   useState,
@@ -17,20 +18,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { CldUploadWidget } from "next-cloudinary";
 import Select from "react-select";
-import makeAnimated from "react-select/animated";
-
-const animatedComponents = makeAnimated();
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
 
 const StudentForm = ({
   type,
@@ -63,9 +50,9 @@ const StudentForm = ({
   );
 
   const onSubmit = handleSubmit((data) => {
-    console.log("hello");
-    console.log(data);
-    formAction({ ...data, img: img?.secure_url });
+    startTransition(() => {
+      formAction({ ...data, img: img?.secure_url });
+    });
   });
 
   const router = useRouter();
@@ -78,7 +65,7 @@ const StudentForm = ({
     }
   }, [state, router, type, setOpen]);
 
-  const { grades, classes } = relatedData;
+  const { grades, classes, parents = [] } = relatedData;
 
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
@@ -116,7 +103,7 @@ const StudentForm = ({
         Personal Information
       </span>
       <CldUploadWidget
-        uploadPreset="school"
+        uploadPreset="student"
         onSuccess={(result, { widget }) => {
           setImg(result.info);
           widget.close();
@@ -125,11 +112,28 @@ const StudentForm = ({
         {({ open }) => {
           return (
             <div
-              className="text-xs text-gray-500 flex items-center gap-2 cursor-pointer"
+              className="w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden text-xs text-gray-500 gap-2 cursor-pointer"
               onClick={() => open()}
             >
-              <Image src="/icons/upload.png" alt="" width={28} height={28} />
-              <span>Upload a photo</span>
+              {img?.secure_url ? (
+                <Image
+                  src={img.secure_url}
+                  alt="Student"
+                  width={128}
+                  height={128}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <>
+                  <Image
+                    src="/icons/upload.png"
+                    alt=""
+                    width={28}
+                    height={28}
+                  />
+                  <span>Upload a photo</span>
+                </>
+              )}
             </div>
           );
         }}
@@ -178,13 +182,6 @@ const StudentForm = ({
           error={errors.birthday}
           type="date"
         />
-        <InputField
-          label="Parent Id"
-          name="parentId"
-          defaultValue={data?.parentId}
-          register={register}
-          error={errors.parentId}
-        />
         {data && (
           <InputField
             label="Id"
@@ -227,6 +224,52 @@ const StudentForm = ({
           )}
         </div>
         <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Parent</label>
+          <Controller
+            name="parentId"
+            control={control}
+            defaultValue={data?.parentId || ""}
+            render={({ field }) => (
+              <Select
+                options={parents.map(
+                  (parent: { id: string; name: string; surname: string }) => ({
+                    value: parent.id,
+                    label: `${parent.name} ${parent.surname}`,
+                  })
+                )}
+                value={
+                  field.value
+                    ? {
+                        value: field.value,
+                        label: parents.find(
+                          (p: { id: string }) => p.id === field.value
+                        )
+                          ? `${
+                              parents.find(
+                                (p: { id: string }) => p.id === field.value
+                              ).name
+                            } ${
+                              parents.find(
+                                (p: { id: string }) => p.id === field.value
+                              ).surname
+                            }`
+                          : "",
+                      }
+                    : null
+                }
+                onChange={(option) => field.onChange(option?.value)}
+                menuPlacement="auto"
+                isClearable
+              />
+            )}
+          />
+          {errors.parentId?.message && (
+            <p className="text-xs text-red-400">
+              {errors.parentId.message.toString()}
+            </p>
+          )}
+        </div>
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Grade</label>
           <Controller
             name="gradeId"
@@ -252,14 +295,6 @@ const StudentForm = ({
                     : null
                 }
                 onChange={(option) => field.onChange(option?.value)}
-                // styles={{
-                //   menu: (provided) => ({
-                //     ...provided,
-                //     maxHeight: 28 * 4.5 + 8,
-                //     width: 170,
-                //     overflowY: "scroll",
-                //   }),
-                // }}
                 menuPlacement="auto"
               />
             )}
@@ -300,14 +335,6 @@ const StudentForm = ({
                     : null
                 }
                 onChange={(option) => field.onChange(option?.value)}
-                // styles={{
-                //   menu: (provided) => ({
-                //     ...provided,
-                //     maxHeight: 28 * 4.5 + 8,
-                //     width: 170,
-                //     overflowY: "scroll",
-                //   }),
-                // }}
                 menuPlacement="auto"
               />
             )}
@@ -324,9 +351,9 @@ const StudentForm = ({
       )}
       <button
         type="submit"
-        className="bg-blue-400 text-white p-2 rounded-md cursor-pointer"
+        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
       >
-        {type === "create" ? "Create" : "Update"}
+        {type === "create" ? "Create Student" : "Update Student"}
       </button>
     </form>
   );
