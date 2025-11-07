@@ -35,6 +35,8 @@ const StudentForm = ({
     handleSubmit,
     formState: { errors },
     control,
+    watch,
+    setValue,
   } = useForm<StudentSchema>({
     resolver: zodResolver(studentSchema),
   });
@@ -65,7 +67,8 @@ const StudentForm = ({
     }
   }, [state, router, type, setOpen]);
 
-  const { grades, classes, parents = [] } = relatedData;
+  const { grades, classes = [], parents = [] } = relatedData ?? {};
+  const selectedGradeId = watch("gradeId");
 
   return (
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
@@ -311,33 +314,53 @@ const StudentForm = ({
             name="classId"
             control={control}
             defaultValue={data?.classId || ""}
-            render={({ field }) => (
-              <Select
-                options={classes.map(
-                  (classItem: {
-                    id: number;
-                    name: string;
-                    capacity: number;
-                    _count: { students: number };
-                  }) => ({
-                    value: classItem.id,
-                    label: `${classItem.name} (${classItem._count.students}/${classItem.capacity} Capacity)`,
-                  })
-                )}
-                value={
-                  field.value
-                    ? {
-                        value: field.value,
-                        label: classes.find(
-                          (c: { id: number }) => c.id === field.value
-                        )?.name,
-                      }
-                    : null
+            render={({ field }) => {
+              const filteredClasses = classes.filter(
+                (c: any) => String(c.gradeId) === String(selectedGradeId)
+              );
+
+              useEffect(() => {
+                if (
+                  field.value &&
+                  !filteredClasses.find(
+                    (c: any) => String(c.id) === String(field.value)
+                  )
+                ) {
+                  setValue("classId", undefined as any);
                 }
-                onChange={(option) => field.onChange(option?.value)}
-                menuPlacement="auto"
-              />
-            )}
+              }, [selectedGradeId]);
+
+              return (
+                <Select
+                  options={filteredClasses.map(
+                    (classItem: {
+                      id: number;
+                      name: string;
+                      capacity: number;
+                      _count: { students: number };
+                    }) => ({
+                      value: classItem.id,
+                      label: `${classItem.name} (${
+                        classItem._count?.students ?? 0
+                      }/${classItem.capacity} Capacity)`,
+                    })
+                  )}
+                  value={
+                    field.value
+                      ? {
+                          value: field.value,
+                          label: filteredClasses.find(
+                            (c: any) => c.id === field.value
+                          )?.name,
+                        }
+                      : null
+                  }
+                  onChange={(option) => field.onChange(option?.value)}
+                  menuPlacement="auto"
+                  isClearable
+                />
+              );
+            }}
           />
           {errors.classId?.message && (
             <p className="text-xs text-red-400">
@@ -347,7 +370,9 @@ const StudentForm = ({
         </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">
+          {state.message || "Something went wrong!"}
+        </span>
       )}
       <button
         type="submit"
