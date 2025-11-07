@@ -112,3 +112,14 @@ export const parentSchema = z.object({
 });
 
 export type ParentSchema = z.infer<typeof parentSchema>;
+
+export const messageSchema = z.object({
+  id: z.coerce.number().optional(),
+  content: z.string().min(1, { message: "Message content is required!" }),
+  senderType: z.enum(["admin", "teacher"]).optional(),
+  senderId: z.string().optional(),
+  receiverType: z.enum(["teacher", "student", "parent"]),
+  receiverId: z.string(),
+});
+
+export type MessageSchema = z.infer<typeof messageSchema>;
