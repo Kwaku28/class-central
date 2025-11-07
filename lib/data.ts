@@ -268,6 +268,11 @@ export const getLessonColumns = (role?: string) => [
     accessor: "teacher",
     className: "hidden md:table-cell",
   },
+  {
+    header: "Schedule",
+    accessor: "schedule",
+    className: "hidden md:table-cell",
+  },
   ...(role === "admin"
     ? [
       {
