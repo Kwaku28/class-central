@@ -57,7 +57,7 @@ const ClassForm = ({
 
   useEffect(() => {
     if (state.success) {
-      toast(`Subject has been ${type === "create" ? "created" : "updated"}!`);
+      toast(`Class has been ${type === "create" ? "created" : "updated"}!`);
       setOpen(false);
       router.refresh();
     }
@@ -159,7 +159,7 @@ const ClassForm = ({
             defaultValue={data?.gradeId || ""}
             render={({ field }) => (
               <Select
-                options={grades.map((grade: { id: number; level: number }) => ({
+                options={grades.map((grade: { id: number; level: string }) => ({
                   value: grade.id,
                   label: grade.level.toString(),
                 }))}
@@ -169,7 +169,7 @@ const ClassForm = ({
                         value: field.value,
                         label: grades
                           .find(
-                            (g: { id: number; level: number }) =>
+                            (g: { id: number; level: string }) =>
                               g.id === field.value
                           )
                           ?.level.toString(),
@@ -189,7 +189,9 @@ const ClassForm = ({
         </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">
+          {state.message || "Something went wrong!"}
+        </span>
       )}
       <button
         type="submit"
