@@ -11,6 +11,8 @@ datasource db {
 model Admin {
   id       String @id
   username String @unique
+
+  messagesSent Message[] @relation("MessageSenderAdmin")
 }
 
 model Student {
@@ -34,6 +36,8 @@ model Student {
   class       Class        @relation(fields: [classId], references: [id])
   grade       Grade        @relation(fields: [gradeId], references: [id])
   parent      Parent       @relation(fields: [parentId], references: [id])
+
+  messagesReceived Message[] @relation("MessageReceiverStudent")
 }
 
 model Teacher {
@@ -52,6 +56,10 @@ model Teacher {
   classes   Class[]
   lessons   Lesson[]
   subjects  Subject[] @relation("SubjectToTeacher")
+
+  messagesSent Message[] @relation("MessageSenderTeacher")
+
+  messagesReceived Message[] @relation("MessageReceiverTeacher")
 }
 
 model Parent {
@@ -64,6 +72,27 @@ model Parent {
   address   String
   createdAt DateTime  @default(now())
   students  Student[]
+
+  messagesReceived Message[] @relation("MessageReceiverParent")
+}
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  timestamp DateTime @default(now())
+
+  senderAdminId   String?
+  senderTeacherId String?
+
+  receiverTeacherId String?
+  receiverStudentId String?
+  receiverParentId  String?
+
+  senderAdmin   Admin?   @relation("MessageSenderAdmin", fields: [senderAdminId], references: [id])
+  senderTeacher Teacher? @relation("MessageSenderTeacher", fields: [senderTeacherId], references: [id])
+
+  receiverTeacher Teacher? @relation("MessageReceiverTeacher", fields: [receiverTeacherId], references: [id])
+  receiverStudent Student? @relation("MessageReceiverStudent", fields: [receiverStudentId], references: [id])
+  receiverParent  Parent?  @relation("MessageReceiverParent", fields: [receiverParentId], references: [id])
 }
 
 model Grade {
