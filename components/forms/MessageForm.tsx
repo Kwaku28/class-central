@@ -85,7 +85,7 @@ const MessageForm = ({
   return (
     <form className="flex flex-col gap-4" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold text-center">
-        {type === "create" ? "Create a new message" : "Edit message"}
+        {type === "create" ? "Create new message" : "Edit message"}
       </h1>
       <div className="flex flex-col gap-2">
         <label className="text-xs text-gray-500">Message</label>
