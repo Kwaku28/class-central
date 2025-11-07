@@ -260,7 +260,9 @@ const TeacherForm = ({
                   typeof val === "object"
                     ? val
                     : subjects
-                        .filter((s: { id: number }) => String(s.id) === String(val))
+                        .filter(
+                          (s: { id: number }) => String(s.id) === String(val)
+                        )
                         .map((s: { id: number; name: string }) => ({
                           value: String(s.id),
                           label: s.name,
@@ -268,7 +270,9 @@ const TeacherForm = ({
                 )}
                 onChange={(selected) =>
                   field.onChange(
-                    selected ? selected.map((opt: any) => String(opt.value)) : []
+                    selected
+                      ? selected.map((opt: any) => String(opt.value))
+                      : []
                   )
                 }
                 menuPlacement="auto"
@@ -284,8 +288,8 @@ const TeacherForm = ({
       </div>
       {state.error && (
         <span className="text-red-500">
-    {state.message || "Something went wrong!"}
-  </span>
+          {state.message || "Something went wrong!"}
+        </span>
       )}
       <button
         type="submit"
