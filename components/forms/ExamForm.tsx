@@ -15,9 +15,6 @@ import {
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
-import makeAnimated from "react-select/animated";
-
-const animatedComponents = makeAnimated();
 
 const ExamForm = ({
   type,
