@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import { CldUploadWidget } from "next-cloudinary";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
+import { Button } from "@/components/ui/stateful-button";
 
 const animatedComponents = makeAnimated();
 
@@ -291,12 +292,12 @@ const TeacherForm = ({
           {state.message || "Something went wrong!"}
         </span>
       )}
-      <button
+      <Button
         type="submit"
-        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
+        className="bg-classYellow py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
       >
         {type === "create" ? "Create Teacher" : "Update Teacher"}
-      </button>
+      </Button>
     </form>
   );
 };
