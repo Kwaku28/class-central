@@ -1,3 +1,4 @@
+import { getAttendanceReport } from "@/lib/actions";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -9,25 +10,17 @@ export async function GET(request: Request) {
     const dateTo = url.searchParams.get("dateTo");
     const search = url.searchParams.get("search");
 
-    const where: any = {};
-    if (classId) where.classId = Number(classId);
-    if (dateFrom || dateTo) {
-      where.date = {};
-      if (dateFrom) where.date.gte = new Date(dateFrom);
-      if (dateTo) where.date.lte = new Date(dateTo);
-    }
-    if (search) {
-      where.OR = [
-        { student: { name: { contains: search, mode: "insensitive" } } },
-        { student: { surname: { contains: search, mode: "insensitive" } } },
-        { note: { contains: search, mode: "insensitive" } },
-      ];
-    }
+    const res = await getAttendanceReport({
+      classId: classId ? Number(classId) : undefined,
+      dateFrom: dateFrom ?? undefined,
+      dateTo: dateTo ?? undefined,
+    });
 
-    const rows = await prisma.attendance.findMany({
-      where,
-      include: { student: { select: { id: true, name: true, surname: true } }, class: { select: { id: true, name: true } } },
-      orderBy: { date: "desc" },
+    const rows = (res.success ? (res.data as any[]) : []).filter((r) => {
+      if (!search) return true;
+      const s = search.toLowerCase();
+      const studentName = `${r.student?.name ?? ""} ${r.student?.surname ?? ""}`.toLowerCase();
+      return studentName.includes(s) || (r.note ?? "").toLowerCase().includes(s);
     });
 
     const header = ["date", "student_id", "student_name", "class_id", "class_name", "status", "note"];
@@ -50,11 +43,11 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="attendance_export_${new Date().toISOString().slice(0,10)}.csv"`,
+        "Content-Disposition": `attachment; filename="attendance.csv"`,
       },
     });
   } catch (err) {
-    console.error("Export attendance failed:", err);
-    return NextResponse.json({ error: "Failed to export" }, { status: 500 });
+    console.log(err);
+    return NextResponse.json({ error: "Failed to export attendance" }, { status: 500 });
   }
 }
