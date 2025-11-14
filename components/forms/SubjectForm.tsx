@@ -8,6 +8,7 @@ import { createSubject, updateSubject } from "@/lib/actions";
 import { Dispatch, SetStateAction, startTransition, useActionState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/stateful-button";
 
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
@@ -137,12 +138,12 @@ const SubjectForm = ({
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>
       )}
-      <button
+      <Button
         type="submit"
-        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
+        className="bg-classYellow py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
       >
-        {type === "create" ? "Create" : "Update"}
-      </button>
+        {type === "create" ? "Create Subject" : "Update Subject"}
+      </Button>
     </form>
   );
 };
