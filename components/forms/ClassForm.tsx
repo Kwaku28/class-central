@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import makeAnimated from "react-select/animated";
+import { Button } from "@/components/ui/stateful-button";
 
 const animatedComponents = makeAnimated();
 
@@ -193,12 +194,12 @@ const ClassForm = ({
           {state.message || "Something went wrong!"}
         </span>
       )}
-      <button
+      <Button
         type="submit"
-        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
+        className="bg-classYellow py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
       >
-        {type === "create" ? "Create" : "Update"}
-      </button>
+        {type === "create" ? "Create Class" : "Update Class"}
+      </Button>
     </form>
   );
 };
