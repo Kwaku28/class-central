@@ -479,3 +479,29 @@ export const getTeacherColumns = (role?: string) => [
     ]
     : []),
 ];
+
+export const getAttendanceColumns = [
+  {
+    header: "Date",
+    accessor: "date"
+  },
+  {
+    header: "Student",
+    accessor: "student"
+  },
+  {
+    header: "Class",
+    accessor: "class",
+    className: "hidden md:table-cell"
+  },
+  {
+    header: "Status",
+    accessor: "status",
+    className: "hidden md:table-cell"
+  },
+  {
+    header: "Note",
+    accessor: "note",
+    className: "hidden lg:table-cell"
+  },
+];
