@@ -1,6 +1,7 @@
 import Image from "next/image";
 import prisma from "@/lib/prisma";
 import AttendanceChart from "../dashboard/AttendanceChart";
+import { AttendanceStatus } from "@prisma/client";
 
 const AttendanceChartContainer = async () => {
   const today = new Date();
@@ -8,22 +9,20 @@ const AttendanceChartContainer = async () => {
   const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
   const lastMonday = new Date(today);
-
   lastMonday.setDate(today.getDate() - daysSinceMonday);
 
-  const resData = await prisma.attendance.findMany({
-    where: {
-      date: {
-        gte: lastMonday,
+  const resData: Array<{ date: Date; status: AttendanceStatus }> =
+    await prisma.attendance.findMany({
+      where: {
+        date: {
+          gte: lastMonday,
+        },
       },
-    },
-    select: {
-      date: true,
-      present: true,
-    },
-  });
-
-  // console.log(data)
+      select: {
+        date: true,
+        status: true,
+      },
+    });
 
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
@@ -38,12 +37,12 @@ const AttendanceChartContainer = async () => {
 
   resData.forEach((item) => {
     const itemDate = new Date(item.date);
-    const dayOfWeek = itemDate.getDay();
-    
-    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      const dayName = daysOfWeek[dayOfWeek - 1];
+    const dow = itemDate.getDay();
 
-      if (item.present) {
+    if (dow >= 1 && dow <= 5) {
+      const dayName = daysOfWeek[dow - 1];
+
+      if (item.status === "PRESENT") {
         attendanceMap[dayName].present += 1;
       } else {
         attendanceMap[dayName].absent += 1;
@@ -63,7 +62,7 @@ const AttendanceChartContainer = async () => {
         <h1 className="text-lg font-semibold">Attendance</h1>
         <Image src="/icons/moreDark.png" alt="" width={20} height={20} />
       </div>
-      <AttendanceChart data={data}/>
+      <AttendanceChart data={data} />
     </div>
   );
 };
