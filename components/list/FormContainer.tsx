@@ -91,28 +91,38 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
           where: {
             ...(role === "teacher" ? { teacherId: currentUserId! } : {}),
           },
-          select: { id: true, name: true },
+          select: { id: true, subjectId: true, classId: true },
         });
         relatedData = { lessons: examLessons };
         break;
       }
-      case "message": {
-        const [msgTeachers, msgStudents, msgParents] = await Promise.all([
-          prisma.teacher.findMany({
-            select: { id: true, name: true, surname: true },
+      case "lesson": {
+        const [lessonSubjects, lessonClasses, lessonTeachers] =
+          await Promise.all([
+            prisma.subject.findMany({ select: { id: true, name: true } }),
+            prisma.class.findMany({ select: { id: true, name: true } }),
+            prisma.teacher.findMany({
+              select: { id: true, name: true, surname: true },
+            }),
+          ]);
+        relatedData = {
+          subjects: lessonSubjects,
+          classes: lessonClasses,
+          teachers: lessonTeachers,
+        };
+        break;
+      }
+      case "attendance": {
+        const [classes, students] = await Promise.all([
+          prisma.class.findMany({
+            select: { id: true, name: true },
+            orderBy: { name: "asc" },
           }),
           prisma.student.findMany({
-            select: { id: true, name: true, surname: true },
-          }),
-          prisma.parent.findMany({
-            select: { id: true, name: true, surname: true },
+            select: { id: true, name: true, surname: true, classId: true },
           }),
         ]);
-        relatedData = {
-          teachers: msgTeachers,
-          students: msgStudents,
-          parents: msgParents,
-        };
+        relatedData = { classes, students };
         break;
       }
 
