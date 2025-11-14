@@ -1,7 +1,6 @@
 import Image from "next/image";
-import prisma from "@/lib/prisma";
 import AttendanceChart from "../dashboard/AttendanceChart";
-import { AttendanceStatus } from "@prisma/client";
+import { getAttendanceReport } from "@/lib/actions";
 
 const AttendanceChartContainer = async () => {
   const today = new Date();
@@ -11,42 +10,40 @@ const AttendanceChartContainer = async () => {
   const lastMonday = new Date(today);
   lastMonday.setDate(today.getDate() - daysSinceMonday);
 
-  const resData: Array<{ date: Date; status: AttendanceStatus }> =
-    await prisma.attendance.findMany({
-      where: {
-        date: {
-          gte: lastMonday,
-        },
-      },
-      select: {
-        date: true,
-        status: true,
-      },
-    });
+  const res = await getAttendanceReport({
+    dateFrom: lastMonday.toISOString(),
+    dateTo: today.toISOString(),
+  });
+
+  const rows: Array<any> = res?.success ? res.data ?? [] : [];
 
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 
-  const attendanceMap: { [key: string]: { present: number; absent: number } } =
-    {
-      Mon: { present: 0, absent: 0 },
-      Tue: { present: 0, absent: 0 },
-      Wed: { present: 0, absent: 0 },
-      Thu: { present: 0, absent: 0 },
-      Fri: { present: 0, absent: 0 },
-    };
+  const attendanceMap: { [key: string]: { present: number; absent: number } } = {
+    Mon: { present: 0, absent: 0 },
+    Tue: { present: 0, absent: 0 },
+    Wed: { present: 0, absent: 0 },
+    Thu: { present: 0, absent: 0 },
+    Fri: { present: 0, absent: 0 },
+  };
 
-  resData.forEach((item) => {
+  rows.forEach((item) => {
     const itemDate = new Date(item.date);
     const dow = itemDate.getDay();
 
+    // only count Mon-Fri
     if (dow >= 1 && dow <= 5) {
       const dayName = daysOfWeek[dow - 1];
 
-      if (item.status === "PRESENT") {
-        attendanceMap[dayName].present += 1;
-      } else {
-        attendanceMap[dayName].absent += 1;
+      let isPresent = false;
+      if (item?.status !== undefined && item?.status !== null) {
+        isPresent = String(item.status).toUpperCase() === "PRESENT";
+      } else if ("present" in item) {
+        isPresent = Boolean(item.present);
       }
+
+      if (isPresent) attendanceMap[dayName].present += 1;
+      else attendanceMap[dayName].absent += 1;
     }
   });
 
