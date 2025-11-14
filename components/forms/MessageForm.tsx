@@ -9,6 +9,7 @@ import { useUser } from "@clerk/nextjs";
 import { useActionState } from "react";
 import { messageSchema, MessageSchema } from "@/lib/formValidationSchemas";
 import { createMessage, updateMessage } from "@/lib/actions";
+import { Button } from "@/components/ui/stateful-button";
 
 const MessageForm = ({
   type,
@@ -185,12 +186,12 @@ const MessageForm = ({
       )}
 
       <div className="flex justify-center">
-        <button
+        <Button
           type="submit"
-          className="bg-blue-600 text-white py-2 px-4 rounded-md"
+          className="bg-classYellow py-2 px-4 rounded-md"
         >
           {type === "create" ? "Send Message" : "Update Message"}
-        </button>
+        </Button>
       </div>
     </form>
   );
