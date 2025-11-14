@@ -138,3 +138,18 @@ export const lessonSchema = z.object({
 });
 
 export type LessonSchema = z.infer<typeof lessonSchema>;
+
+export const attendanceSchema = z.object({
+  id: z.coerce.number().optional(),
+  classId: z.coerce.number().min(1, { message: "Class is required" }),
+  lessonId: z.coerce.number().optional(),
+  date: z.string().refine((v) => !Number.isNaN(Date.parse(v)), { message: "Invalid date" }),
+  records: z.array(
+    z.object({
+      studentId: z.string(),
+      status: z.enum(["PRESENT", "ABSENT", "LATE", "EXCUSED"], { message: "Status is required!" }),
+      note: z.string().optional(),
+    })
+  ).min(1, { message: "No attendance records provided" }),
+});
+export type AttendanceSchema = z.infer<typeof attendanceSchema>;
