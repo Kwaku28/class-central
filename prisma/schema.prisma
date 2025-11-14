@@ -106,6 +106,7 @@ model Class {
   events        Event[]
   lessons       Lesson[]
   students      Student[]
+  attendances   Attendance[]
 }
 
 model Subject {
@@ -163,13 +164,20 @@ model Result {
 }
 
 model Attendance {
-  id        Int      @id @default(autoincrement())
-  date      DateTime
-  present   Boolean
+  id        Int              @id @default(autoincrement())
   studentId String
-  lessonId  Int
-  lesson    Lesson   @relation(fields: [lessonId], references: [id])
-  student   Student  @relation(fields: [studentId], references: [id])
+  classId   Int
+  lessonId  Int?
+  date      DateTime
+  status    AttendanceStatus
+  note      String?
+  createdAt DateTime         @default(now())
+
+  student Student @relation(fields: [studentId], references: [id])
+  class   Class   @relation(fields: [classId], references: [id])
+  lesson  Lesson? @relation(fields: [lessonId], references: [id])
+
+  @@unique([studentId, date, lessonId])
 }
 
 model Event {
@@ -202,4 +210,11 @@ enum Day {
   WEDNESDAY
   THURSDAY
   FRIDAY
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
 }
