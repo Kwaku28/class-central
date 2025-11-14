@@ -15,6 +15,7 @@ import {
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
+import { Button } from "@/components/ui/stateful-button";
 
 const ExamForm = ({
   type,
@@ -111,9 +112,9 @@ const ExamForm = ({
             render={({ field }) => (
               <Select
                 options={lessons.map(
-                  (lesson: { id: number; name: string }) => ({
+                  (lesson: { id: number; subjectId: string }) => ({
                     value: lesson.id,
-                    label: lesson.name,
+                    label: lesson.subjectId,
                   })
                 )}
                 value={
@@ -140,14 +141,16 @@ const ExamForm = ({
         </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">
+          {state.message || "Something went wrong!"}
+        </span>
       )}
-      <button
+      <Button
         type="submit"
-        className="bg-blue-400 text-white py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
+        className="bg-classYellow py-2 px-4 rounded-md border-none w-max self-center cursor-pointer"
       >
-        {type === "create" ? "Create" : "Update"}
-      </button>
+        {type === "create" ? "Create Exam" : "Update Exam"}
+      </Button>
     </form>
   );
 };
