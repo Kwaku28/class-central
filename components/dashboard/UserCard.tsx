@@ -18,7 +18,7 @@ const UserCard = async ({
   const CURRENT_ACADEMIC_YEAR = AcademicYear();
 
   return (
-    <div className="rounded-2xl odd:bg-sky-200 even:bg-yellow-200 p-4 flex-1 min-w-[130px]">
+    <div className="rounded-2xl odd:bg-classSky even:bg-classYellow p-4 flex-1 min-w-[130px]">
       <div className="flex justify-between items-center">
         <span className="text-[10px] bg-white px-2 py-1 rounded-full text-green-600">
           {CURRENT_ACADEMIC_YEAR}
