@@ -64,6 +64,9 @@ const MessageForm = dynamic(() => import("../forms/MessageForm"), {
 const LessonForm = dynamic(() => import("../forms/LessonForm"), {
   loading: () => <h1>Loading...</h1>,
 });
+const AttendanceForm = dynamic(() => import("../forms/AttendanceForm"), {
+  loading: () => <h1>Loading...</h1>,
+});
 
 const forms: {
   [key: string]: (
@@ -131,6 +134,14 @@ const forms: {
   ),
   message: (setOpen, type, data, relatedData) => (
     <MessageForm
+      type={type}
+      data={data}
+      setOpen={setOpen}
+      relatedData={relatedData}
+    />
+  ),
+  attendance: (setOpen, type, data, relatedData) => (
+    <AttendanceForm
       type={type}
       data={data}
       setOpen={setOpen}
