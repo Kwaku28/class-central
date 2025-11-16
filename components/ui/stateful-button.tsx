@@ -34,6 +34,7 @@ export const Button = ({ className, children, ...props }: ButtonProps) => {
         display: "none",
       },
       {
+        delay: 1,
         duration: 0.2,
       }
     );
