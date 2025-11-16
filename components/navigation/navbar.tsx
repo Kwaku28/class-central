@@ -1,11 +1,53 @@
 import { UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import Image from "next/image";
+import prisma from "@/lib/prisma";
+import Link from "next/link";
 
 const Navbar = async () => {
   const user = await currentUser();
+
+  let messageCount = 0;
+  try {
+    if (user) {
+      const role = (user?.publicMetadata?.role ?? "") as string;
+      const id = user.id;
+
+      if (role === "teacher") {
+        messageCount = await prisma.message.count({
+          where: {
+            OR: [
+              { receiverTeacherId: id },
+              { recipientType: "all_teachers" },
+            ],
+          },
+        });
+      } else if (role === "student") {
+        messageCount = await prisma.message.count({
+          where: {
+            OR: [
+              { receiverStudentId: id },
+              { recipientType: "all_students" },
+            ],
+          },
+        });
+      } else if (role === "parent") {
+        messageCount = await prisma.message.count({
+          where: {
+            OR: [
+              { receiverParentId: id },
+              { recipientType: "all_parents" },
+            ],
+          },
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Failed to fetch message count", err);
+    messageCount = 0;
+  }
+
   const announcementCount = 10;
-  const messageCount = 5;
 
   return (
     <div className="flex items-center justify-between p-4">
@@ -20,22 +62,22 @@ const Navbar = async () => {
       </div>
       {/* ICONS AND USER */}
       <div className="flex items-center gap-6 justify-end w-full">
-        <div className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative">
+        <Link href={`/list/messages`} className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative">
           <Image src="/icons/message.png" alt="" width={20} height={20} />
           {messageCount > 0 && (
             <div className="absolute -top-3 -right-3 w-6 h-6 flex items-center justify-center bg-purple-500 text-white rounded-full text-xs">
               {messageCount > 99 ? "99+" : messageCount}
             </div>
           )}
-        </div>
-        <div className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative">
+        </Link>
+        <Link href={`/list/announcements`} className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer relative">
           <Image src="/icons/announcement.png" alt="" width={20} height={20} />
           {announcementCount > 0 && (
             <div className="absolute -top-3 -right-3 w-6 h-6 flex items-center justify-center bg-purple-500 text-white rounded-full text-xs">
               {announcementCount > 99 ? "99+" : announcementCount}
             </div>
           )}
-        </div>
+        </Link>
         <div className="flex flex-col">
           <span className="text-xs leading-3 font-medium">
             {user?.firstName} {user?.lastName}
