@@ -114,12 +114,15 @@ export const parentSchema = z.object({
 export type ParentSchema = z.infer<typeof parentSchema>;
 
 export const messageSchema = z.object({
-  id: z.coerce.number().optional(),
-  content: z.string().min(1, { message: "Message content is required!" }),
-  senderType: z.enum(["admin", "teacher"]).optional(),
-  senderId: z.string().optional(),
+  content: z
+    .string()
+    .min(1, { message: "Content is required!" })
+    .max(500, { message: "Content must be less than 500 characters!" }),
   receiverType: z.enum(["teacher", "student", "parent"]),
-  receiverId: z.string(),
+  receiverId: z.string().optional(),
+  senderType: z.string().optional(),
+  senderId: z.string().optional(),
+  sendToAll: z.boolean().optional().default(false),
 });
 
 export type MessageSchema = z.infer<typeof messageSchema>;
