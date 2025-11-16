@@ -326,7 +326,12 @@ export const getMessageColumns = (role?: string) => [
     accessor: "timestamp",
     className: "hidden md:table-cell",
   },
-  ...(role === "admin"
+  {
+    header: "Receiver",
+    accessor: "receiver",
+    className: "hidden md:table-cell",
+  },
+  ...(role === "admin" || role === "teacher"
     ? [
       {
         header: "Actions",
