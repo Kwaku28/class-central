@@ -11,6 +11,8 @@ datasource db {
 model Admin {
   id           String    @id
   username     String    @unique
+  name         String?
+  surname      String?
   messagesSent Message[] @relation("MessageSenderAdmin")
 }
 
@@ -80,6 +82,7 @@ model Message {
   receiverTeacherId String?
   receiverStudentId String?
   receiverParentId  String?
+  recipientType     String?  @default("individual")
   receiverParent    Parent?  @relation("MessageReceiverParent", fields: [receiverParentId], references: [id])
   receiverStudent   Student? @relation("MessageReceiverStudent", fields: [receiverStudentId], references: [id])
   receiverTeacher   Teacher? @relation("MessageReceiverTeacher", fields: [receiverTeacherId], references: [id])
@@ -101,12 +104,12 @@ model Class {
   supervisorId  String?
   gradeId       Int
   announcements Announcement[]
+  attendances   Attendance[]
   grade         Grade          @relation(fields: [gradeId], references: [id])
   supervisor    Teacher?       @relation(fields: [supervisorId], references: [id])
   events        Event[]
   lessons       Lesson[]
   students      Student[]
-  attendances   Attendance[]
 }
 
 model Subject {
@@ -165,17 +168,16 @@ model Result {
 
 model Attendance {
   id        Int              @id @default(autoincrement())
-  studentId String
-  classId   Int
-  lessonId  Int?
   date      DateTime
-  status    AttendanceStatus
-  note      String?
+  studentId String
+  lessonId  Int?
+  classId   Int
   createdAt DateTime         @default(now())
-
-  student Student @relation(fields: [studentId], references: [id])
-  class   Class   @relation(fields: [classId], references: [id])
-  lesson  Lesson? @relation(fields: [lessonId], references: [id])
+  note      String?
+  status    AttendanceStatus
+  class     Class            @relation(fields: [classId], references: [id])
+  lesson    Lesson?          @relation(fields: [lessonId], references: [id])
+  student   Student          @relation(fields: [studentId], references: [id])
 
   @@unique([studentId, date, lessonId])
 }
