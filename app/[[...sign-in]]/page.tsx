@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/stateful-button";
 import * as Clerk from "@clerk/elements/common";
 import * as SignIn from "@clerk/elements/sign-in";
 import { useUser } from "@clerk/nextjs";
@@ -55,12 +56,12 @@ const LoginPage = () => {
             />
             <Clerk.FieldError className="text-xs text-red-400" />
           </Clerk.Field>
-          <SignIn.Action
-            submit
-            className="bg-blue-500 text-white my-1 rounded-md text-sm p-[10px]"
+          <Button
+            type="submit"
+            className="w-full bg-blue-500 text-white my-1 rounded-full text-sm"
           >
             Sign In
-          </SignIn.Action>
+          </Button>
         </SignIn.Step>
       </SignIn.Root>
     </div>
