@@ -144,6 +144,7 @@ export const lessonSchema = z.object({
   endTime: z
     .string()
     .regex(timeRegex, { message: "End time must be in HH:MM format" }),
+  name: z.string().optional(),
 });
 
 export type LessonSchema = z.infer<typeof lessonSchema>;
