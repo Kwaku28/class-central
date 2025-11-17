@@ -112,9 +112,9 @@ const ExamForm = ({
             render={({ field }) => (
               <Select
                 options={lessons.map(
-                  (lesson: { id: number; subjectId: string }) => ({
+                  (lesson: { id: number; name: string }) => ({
                     value: lesson.id,
-                    label: lesson.subjectId,
+                    label: lesson.name,
                   })
                 )}
                 value={
