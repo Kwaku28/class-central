@@ -91,7 +91,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
           where: {
             ...(role === "teacher" ? { teacherId: currentUserId! } : {}),
           },
-          select: { id: true, subjectId: true, classId: true },
+          select: { id: true, subjectId: true, classId: true, name: true },
         });
         relatedData = { lessons: examLessons };
         break;
