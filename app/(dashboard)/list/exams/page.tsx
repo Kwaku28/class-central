@@ -5,9 +5,9 @@ import TableSearch from "@/components/list/TableSearch";
 import prisma from "@/lib/prisma";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Exam, Prisma, Subject, Teacher } from "@prisma/client";
-import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
 import { getExamColumns } from "@/lib/data";
+import SortFilterControls from "@/components/list/SortFilterControls";
 
 type ExamList = Exam & {
   lesson: {
@@ -61,8 +61,6 @@ const ExamListPage = async ({
 
   const p = page ? parseInt(page) : 1;
 
-  // URL PARAMS CONDITION
-
   const query: Prisma.ExamWhereInput = {};
 
   query.lesson = {};
@@ -87,8 +85,6 @@ const ExamListPage = async ({
       }
     }
   }
-
-  // ROLE CONDITIONS
 
   switch (role) {
     case "admin":
@@ -145,12 +141,41 @@ const ExamListPage = async ({
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-classYellow">
-              <Image src="/icons/filter.png" alt="" width={14} height={14} />
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-full bg-classYellow">
-              <Image src="/icons/sort.png" alt="" width={14} height={14} />
-            </button>
+            <SortFilterControls
+              sortOptions={[
+                { label: "Subject", value: "subject" },
+                { label: "Class", value: "class" },
+                { label: "Teacher", value: "teacher" },
+                { label: "Start Time", value: "startTime" },
+              ]}
+              filters={[
+                {
+                  key: "classId",
+                  label: "Class",
+                  type: "select",
+                  options: (
+                    await prisma.class.findMany({
+                      select: { id: true, name: true },
+                      orderBy: { name: "asc" },
+                    })
+                  ).map((c) => ({ value: c.id, label: c.name })),
+                },
+                {
+                  key: "teacherId",
+                  label: "Teacher",
+                  type: "select",
+                  options: (
+                    await prisma.teacher.findMany({
+                      select: { id: true, name: true, surname: true },
+                      orderBy: { name: "asc" },
+                    })
+                  ).map((t) => ({
+                    value: t.id,
+                    label: `${t.name} ${t.surname}`,
+                  })),
+                },
+              ]}
+            />
             {(role === "admin" || role === "teacher") && (
               <FormContainer table="exam" type="create" />
             )}
