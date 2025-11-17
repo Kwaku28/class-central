@@ -2,24 +2,15 @@
 
 @import "tw-animate-css";
 
-/* @custom-variant dark (&:is(.dark *)); */
+@custom-variant dark (&:is(.dark *));
 
-:root {
-  --classSky: "#8E9DCC";
-  --classSkyLight: "#EDF9FD";
-  --classPurple: "blue-500";
-  --classPurpleLight: "#F1F0FF";
-  --class-yellow: "#fae27c";
-  --classYellowLight: "#FEFCE8";
-}
-
-@theme inline {
-  --color-classSky: var(--classSky);
-  --color-classSkyLight: var(--classSkyLight);
+@theme {
+  --color-classSky: oklch(0.7014 0.0712 270.76);
+  --color-classSkyLight: oklch(0.9743 0.0138 219.62);
   --color-classPurple: var(--classPurple);
-  --color-classPurpleLight: var(--classPurpleLight);
-  --color-class-yellow: var(--class-yellow);
-  --color-classYellowLight: var(--classYellowLight);
+  --color-classPurpleLight: oklch(0.9603 0.02 289.08);
+  --color-classYellow: oklch(0.9118 0.1253 96.42);
+  --color-classYellowLight: oklch(0.9873 0.0262 102.21);
 }
 
 .remove-scrollbar::-webkit-scrollbar {
