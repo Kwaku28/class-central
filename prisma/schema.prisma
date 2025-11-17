@@ -127,6 +127,7 @@ model Lesson {
   subjectId   Int
   classId     Int
   teacherId   String
+  name        String?
   assignments Assignment[]
   attendances Attendance[]
   exams       Exam[]
