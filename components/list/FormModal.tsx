@@ -34,7 +34,6 @@ const deleteActionMap = {
   lesson: deleteLesson,
   assignment: deleteSubject,
   result: deleteSubject,
-  attendance: deleteSubject,
   event: deleteSubject,
   announcement: deleteSubject,
   message: deleteMessage,
@@ -162,8 +161,8 @@ const FormModal = ({
     type === "create"
       ? "bg-classYellow"
       : type === "update"
-      ? "bg-[#8E9DCC]"
-      : "bg-[#8E9DCC]";
+      ? "bg-classSky"
+      : "bg-[classSky]";
 
   const [open, setOpen] = useState(false);
 
